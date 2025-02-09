@@ -1,4 +1,4 @@
-module github.com/treytiderman/ffmpeg-to-jsmpeg
+module github.com/treytiderman/go-ffmpeg-to-jsmpeg
 
 go 1.23.3
 
