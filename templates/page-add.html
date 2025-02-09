@@ -1,0 +1,104 @@
+{{ define "page" }}
+
+<style>
+    #add {
+        width: 100%;
+        max-width: 120ch;
+        margin-inline: auto;
+    }
+
+    #add textarea {
+        font-family: monospace;
+        resize: vertical;
+    }
+
+    #add .button {
+        display: block;
+        background-color: #18181b;
+        border-color: #3f3f46;
+    }
+
+    #add pre {
+        padding: 1rem;
+        margin: 0;
+        border-radius: 0.3rem;
+        background-color: #27272a;
+        overflow: auto;
+    }
+
+    #add summary {
+        margin: 0;
+        line-height: 1;
+        font-size: 1.4rem;
+        cursor: pointer;
+    }
+</style>
+
+<main id="add">
+    <br>
+
+    <!-- Form -->
+    <form action="/api/stream/new/start" method="post" class="grid gap-4 pad-4">
+
+        <div class="grid gap-1">
+            <label for="name">Stream Name</label>
+            <input type="text" name="name" id="name" placeholder="Stream Name" value="Stream" class="input">
+        </div>
+
+        <div class="grid gap-1">
+            <label for="ffmpeg">FFmpeg Command</label>
+            <textarea name="ffmpeg" rows="6" id="ffmpeg" class="input">ffmpeg
+    -i rtsp://user:password@192.168.1.22:554/cam
+    -f mpegts -codec:v mpeg1video
+    -r 30
+    -</textarea>
+        </div>
+
+        <button type="submit" class="button">Create and Start Stream</button>
+    </form>
+    <br>
+    <br>
+
+    <!-- Examples -->
+    <details class="pad-4">
+        <summary>
+            Examples
+            <hr>
+        </summary>
+        <div class="grid gap-4">
+            <br>
+
+            <div class="grid gap-1">
+                <label>From File</label>
+                <pre>ffmpeg
+    -stream_loop -1 -re -i video.mp4
+    -f mpegts -codec:v mpeg1video
+    -</pre>
+            </div>
+            <br>
+
+            <div class="grid gap-1">
+                <label>USB Web Cam</label>
+                <pre>ffmpeg
+    -f dshow -i "video=HD Web Camera"
+    -f mpegts -codec:v mpeg1video
+    -r 30
+    -</pre>
+            </div>
+            <br>
+
+            <div class="grid gap-1">
+                <label>RTSP Stream (Amcrest)</label>
+                <pre>ffmpeg
+    -i rtsp://user:password@192.168.1.22:554/cam/realmonitor?channel=1&subtype=0
+    -f mpegts -codec:v mpeg1video
+    -r 30
+    -</pre>
+            </div>
+        </div>
+
+    </details>
+
+</main>
+
+{{ end }}

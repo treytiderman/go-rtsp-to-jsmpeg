@@ -1,0 +1,39 @@
+{{ define "layout-header" }}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="tracker app">
+    <title>{{ .Title }}</title>
+    <link rel="icon" type="image/x-icon" href="./public/favicon.ico">
+
+    <link rel="stylesheet" href="./public/styles.css">
+
+    <script src="./public/htmx-v2.0.0.js"></script>
+    <script src="./public/jsmpeg.min.js"></script>
+
+</head>
+
+<style>
+    body {
+        display: grid;
+        grid-template-rows: 3.5rem 1fr;
+        grid-template-columns: 1fr;
+    }
+</style>
+
+<body>
+
+    {{ template "comp-header" . }}
+
+    {{ template "page" . }}
+
+</body>
+
+</html>
+
+{{ end }}
