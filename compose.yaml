@@ -1,0 +1,13 @@
+# Start: docker compose up -d --build
+# Logs: docker compose logs --follow --tail 1000
+# Stop: docker compose down
+
+services:
+  go-ffmpeg-to-jsmpeg:
+    build: ./
+    ports:
+      - 9000:9000
+    volumes:
+      - ./config:/app/config
+      - ./public:/app/public
+    restart: unless-stopped
