@@ -48,7 +48,7 @@ func stringToCommand(input string) []string {
 func saveStreamConfigFile() {
 	slog.Info("save stream config file", "count", len(streamConfigs))
 
-	file, err := os.Create("./config/streams.json")
+	file, err := os.Create("../config/streams.json")
 	if err != nil {
 		slog.Error("failed to create config file", "error", err)
 		return
@@ -69,7 +69,7 @@ func getStreamConfigFile() {
 	slog.Info("get stream config")
 
 	// Read File
-	file, err := os.Open("./config/streams.json")
+	file, err := os.Open("../config/streams.json")
 	if err != nil {
 		slog.Error("failed to open config file", "error", err)
 		return
@@ -94,6 +94,8 @@ func getStreamConfigFile() {
 
 func newStream(name string, ffmpeg string) Stream {
 	split := stringToCommand(ffmpeg)
+
+	fmt.Printf("%v", split)
 
 	// Create a new stream
 	stream := Stream{

@@ -1,5 +1,7 @@
 # RTSP to WebSocket
 
+> Must have FFmpeg installed if not using Docker
+
 Take in a RTSP stream available on the network and restream it as a WebSocket stream to be received by jsmpeg in the browser
 
 Server: RTSP stream (or other input) -> ffmpeg (encode mpeg1video) -> WebSocket stream

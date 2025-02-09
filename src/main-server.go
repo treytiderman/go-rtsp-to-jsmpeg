@@ -22,8 +22,8 @@ type WsClient struct {
 var wsClients = make([]*WsClient, 0)
 
 var wsUpgrader = websocket.Upgrader{
-	ReadBufferSize:  65536,
-	WriteBufferSize: 65536,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
@@ -46,7 +46,7 @@ func httpServerStart() error {
 	mux.Handle("/ws/{id}", middlewareLogger(http.HandlerFunc(handlerWs)))
 
 	// Public Folder Routes
-	mux.Handle("/public/", middlewareLogger(http.StripPrefix("/public/", http.FileServer(http.Dir("./public")))))
+	mux.Handle("/public/", middlewareLogger(http.StripPrefix("/public/", http.FileServer(http.Dir("../public")))))
 	mux.Handle("/", middlewareLogger(http.HandlerFunc(handlerBaseUrl)))
 
 	// Get HTTP Port

@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "id": 1739129657171,
+        "name": "Akira33",
+        "ffmpeg": "ffmpeg -stream_loop -1 -re -i ../public/Akira.mp4 -f mpegts -codec:v mpeg1video -",
+        "status": "stopped"
+    }
+]
