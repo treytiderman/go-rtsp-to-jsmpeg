@@ -98,32 +98,21 @@
             <br>
 
             <div class="grid gap-1">
+                <label>RTSP Stream (Amcrest)</label>
+                <pre>ffmpeg -i "rtsp://user:password@192.168.1.21:554/cam/realmonitor?channel=1&subtype=0" -f mpegts -codec:v mpeg1video -r 30 -</pre>
+            </div>
+
+            <div class="grid gap-1">
                 <label>From File</label>
-                <pre>ffmpeg
-    -stream_loop -1 -re -i video.mp4
-    -f mpegts -codec:v mpeg1video
-    -</pre>
+                <pre>ffmpeg -stream_loop -1 -re -i video.mp4 -f mpegts -codec:v mpeg1video -</pre>
             </div>
             <br>
 
             <div class="grid gap-1">
                 <label>USB Web Cam</label>
-                <pre>ffmpeg
-    -f dshow -i "video=HD Web Camera"
-    -f mpegts -codec:v mpeg1video
-    -r 30
-    -</pre>
+                <pre>ffmpeg -f dshow -i "video=HD Web Camera" -f mpegts -codec:v mpeg1video -r 30 -</pre>
             </div>
             <br>
-
-            <div class="grid gap-1">
-                <label>RTSP Stream (Amcrest)</label>
-                <pre>ffmpeg
-    -i "rtsp://user:password@192.168.1.21:554/cam/realmonitor?channel=1&subtype=0"
-    -f mpegts -codec:v mpeg1video
-    -r 30
-    -</pre>
-            </div>
         </div>
 
     </details>
