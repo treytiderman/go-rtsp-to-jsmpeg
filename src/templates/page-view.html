@@ -61,15 +61,15 @@
             return
         }
         players[canvasId]?.destroy()
-        console.log(location.host);
-        const url = `ws://${location.host}/ws/${streamId}`;
-        console.log(`Starting JSMpeg on canvas-${canvasId}`, url);
+        const protocal = location.protocol === "https:" ? "wss" : "ws"
+        const url = `${protocal}://${location.host}/ws/${streamId}`
+        console.log(`Starting JSMpeg on canvas-${canvasId}`, url)
         players[canvasId] = new JSMpeg.Player(url, {
             canvas: document.getElementById('canvas-' + canvasId)
         })
     }
     function onSelectStream(event, canvasId) {
-        const streamId = event.target.value;
+        const streamId = event.target.value
         document.getElementById('start-' + canvasId).setAttribute("hx-get", `/api/stream/start/${streamId}`)
         document.getElementById('stop-' + canvasId).setAttribute("hx-get", `/api/stream/stop/${streamId}`)
         document.getElementById('remove-' + canvasId).setAttribute("hx-delete", `/api/stream/remove/${streamId}`)
