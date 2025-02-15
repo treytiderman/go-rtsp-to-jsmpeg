@@ -4,7 +4,9 @@
 
 services:
   go-ffmpeg-to-jsmpeg:
-    build: ./
+    build:
+      dockerfile: Dockerfile
+      context: ./
     ports:
       - 9000:9000
     volumes:
