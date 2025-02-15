@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -60,14 +59,14 @@ func saveStreamConfigFile() {
 	encoder.SetIndent("", "    ")
 	err = encoder.Encode(streamConfigs)
 	if err != nil {
-		slog.Error("failed to encode stream configs", "error", err)
+		slog.Error("failed to encode stream config file", "error", err)
 		return
 	}
 
 }
 
 func getStreamConfigFile() {
-	slog.Info("get stream config")
+	slog.Info("get stream config file")
 
 	// Read File
 	file, err := os.Open("../config/streams.json")
@@ -82,7 +81,7 @@ func getStreamConfigFile() {
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&tempStreamConfigs)
 	if err != nil {
-		slog.Error("failed to decode stream configs", "error", err)
+		slog.Error("failed to decode stream config file", "error", err)
 	}
 
 	// Create New Streams from config
@@ -93,7 +92,7 @@ func getStreamConfigFile() {
 
 // Streams
 
-func newStream(name string, ffmpeg string) Stream {
+func newStream(name string, ffmpeg string) *Stream {
 	split := stringToCommand(ffmpeg)
 
 	// Create a new stream
@@ -110,7 +109,7 @@ func newStream(name string, ffmpeg string) Stream {
 	streamConfigs = append(streamConfigs, &stream)
 	saveStreamConfigFile()
 
-	return stream
+	return &stream
 }
 
 func newStreamWithId(name string, ffmpeg string, id int64) Stream {
@@ -142,14 +141,14 @@ func getStreamById(id int64) *Stream {
 	return &Stream{}
 }
 
-// func getStreamByName(name string) Stream {
-// 	for _, stream := range streamConfigs {
-// 		if stream.Name == name {
-// 			return stream
-// 		}
-// 	}
-// 	return Stream{}
-// }
+func getStreamByName(name string) *Stream {
+	for _, stream := range streamConfigs {
+		if stream.Name == name {
+			return stream
+		}
+	}
+	return &Stream{}
+}
 
 func getStreams() []*Stream {
 	return streamConfigs
@@ -199,17 +198,25 @@ func startStream(id int64) {
 		return
 	}
 
-	split := stringToCommand(stream.FFmpeg) // DELETE
-	fmt.Println(strings.Join(split, " ")) // DELETE
-	
-	// Start goroutines
-	go pipeStdoutToWebSocket(stream)
-	go pipeStderrToStdout(stream)
+	// Get stdout
+	stdout, err := stream.cmd.StdoutPipe()
+	if err != nil {
+		fmt.Println("ERROR1", stream.Id, err)
+	}
+	go pipeStdoutToWebSocket(stdout, stream.Id)
+
+	// // Get stderr
+	// stderr, err := stream.cmd.StderrPipe()
+	// if err != nil {
+	// 	fmt.Println("ERROR3", err)
+	// 	return
+	// }
+	// go pipeStderrToStdout(stderr, stream.Id)
 
 	// Start command
 	stream.Status = "running"
 	slog.Info("stream started", "name", stream.Name, "status", stream.Status, "ffmpeg", stream.FFmpeg)
-	err := stream.cmd.Start()
+	err = stream.cmd.Start()
 	if err != nil {
 		stream.Status = "stopped"
 		log.Fatal(err)
@@ -219,60 +226,76 @@ func startStream(id int64) {
 func stopStream(id int64) {
 	stream := getStreamById(id)
 
+	// Check if the process is already terminated
+    if stream.cmd.ProcessState != nil && stream.cmd.ProcessState.Exited() {
+        slog.Info("stream already stopped", "name", stream.Name, "ffmpeg", stream.FFmpeg)
+        return
+    }
+
 	// Stop Steam
 	slog.Info("stream stopped", "name", stream.Name, "ffmpeg", stream.FFmpeg)
 	stream.Status = "stopped"
-	stream.cmd.Process.Kill()
+	err := stream.cmd.Process.Kill()
+    if err != nil {
+        slog.Error("failed to kill process", "error", err)
+        return
+    }
+
+	// Wait for the process to exit
+	_, err = stream.cmd.Process.Wait()
+	if err != nil {
+		slog.Error("failed to wait for process", "error", err)
+		return
+	}
 
 	// Recreate Stream
 	removeStream(stream.Id)
 	newStreamWithId(stream.Name, stream.FFmpeg, stream.Id)
+	slog.Info("stream stopped and recreated", "name", stream.Name, "ffmpeg", stream.FFmpeg)
 }
 
-func pipeStdoutToWebSocket(stream *Stream) {
-	stdout, err := stream.cmd.StdoutPipe()
-	if err != nil {
-		fmt.Println("ERROR1", err)
-	}
+func pipeStdoutToWebSocket(stdout io.ReadCloser, id int64) {
+	defer stdout.Close()
 
 	buf := make([]byte, 65536)
 	for {
 		n, err := stdout.Read(buf)
 		if err != nil && err != io.EOF {
-			fmt.Println("ERROR2", err)
+			fmt.Println("ERROR2", id, err)
+			return
 		}
 
 		if n > 0 {
-			broadcastToWsClients(buf[:n], stream.Id)
+			// fmt.Println("DATA", id, n)
+			broadcastToWsClients(buf[:n], id)
 		}
 
 		if err == io.EOF {
-			fmt.Println("ERROR5", err)
-			// stopStream(stream.Id)
-			// return
+			fmt.Println("ERROR5", id, err)
+			stopStream(id)
+			return
 		}
 
 	}
 }
 
-func pipeStderrToStdout(stream *Stream) {
-	stderr, err := stream.cmd.StderrPipe()
-	if err != nil {
-		fmt.Println("ERROR3", err)
-	}
-	
-	count := 1
+func pipeStderrToStdout(stderr io.ReadCloser, id int64) {
+	defer stderr.Close()
+
 	r := bufio.NewReader(stderr)
-	var line []byte
 	for {
-		line, _, err = r.ReadLine()
-		if err != nil && count > 1 {
-			count++
-			fmt.Println("ERROR4", err)
+		line, _, err := r.ReadLine()
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println("ERROR4", id, err)
+                break
+            }
+			fmt.Println("ERROR6", id, err)
+            break
 		}
 
 		if line != nil {
-			fmt.Println("ffmpeg log", stream.Id, string(line))
+			fmt.Println("ffmpeg log", id, string(line))
 		}
 	}
 }
