@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -241,6 +242,10 @@ func handlerView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	streams := getStreams()
+	
+	sort.Slice(streams, func(i, j int) bool {
+        return streams[j].Name > streams[i].Name
+    })
 
 	gridX := x
 	gridY := y
