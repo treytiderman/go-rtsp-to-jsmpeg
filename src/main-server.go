@@ -276,8 +276,10 @@ func handlerAdd(w http.ResponseWriter, r *http.Request) {
 	tmp := parse_templates("layout-header", "page-add")
 	tmp.ExecuteTemplate(w, "layout-header", struct {
 		Title string
+		Streams  []*Stream
 	}{
 		Title: "Title",
+		Streams:  getStreams(),
 	})
 }
 

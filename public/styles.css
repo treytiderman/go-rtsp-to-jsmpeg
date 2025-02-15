@@ -80,6 +80,19 @@ hr {
     align-content: flex-start;
 }
 
+.flex {
+    display: flex;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.grow {
+    flex-grow: 1;
+}
+
 .gap-1 {
     gap: 0.25rem;
 }

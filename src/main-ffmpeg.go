@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -94,8 +95,6 @@ func getStreamConfigFile() {
 
 func newStream(name string, ffmpeg string) Stream {
 	split := stringToCommand(ffmpeg)
-
-	fmt.Printf("%v", split)
 
 	// Create a new stream
 	stream := Stream{
@@ -193,7 +192,6 @@ func clearAllStreams() {
 
 func startStream(id int64) {
 	stream := getStreamById(id)
-	slog.Debug("DEBUG", "id", id, "status", stream.Status)
 
 	// Return if already started
 	if stream.Status == "running" {
@@ -201,6 +199,9 @@ func startStream(id int64) {
 		return
 	}
 
+	split := stringToCommand(stream.FFmpeg) // DELETE
+	fmt.Println(strings.Join(split, " ")) // DELETE
+	
 	// Start goroutines
 	go pipeStdoutToWebSocket(stream)
 	go pipeStderrToStdout(stream)
@@ -231,14 +232,14 @@ func stopStream(id int64) {
 func pipeStdoutToWebSocket(stream *Stream) {
 	stdout, err := stream.cmd.StdoutPipe()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("ERROR1", err)
 	}
 
 	buf := make([]byte, 65536)
 	for {
 		n, err := stdout.Read(buf)
 		if err != nil && err != io.EOF {
-			log.Fatal(err)
+			fmt.Println("ERROR2", err)
 		}
 
 		if n > 0 {
@@ -246,21 +247,30 @@ func pipeStdoutToWebSocket(stream *Stream) {
 		}
 
 		if err == io.EOF {
-			return
+			fmt.Println("ERROR5", err)
+			// stopStream(stream.Id)
+			// return
 		}
+
 	}
 }
 
 func pipeStderrToStdout(stream *Stream) {
 	stderr, err := stream.cmd.StderrPipe()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("ERROR3", err)
 	}
-
+	
+	count := 1
 	r := bufio.NewReader(stderr)
 	var line []byte
 	for {
-		line, _, _ = r.ReadLine()
+		line, _, err = r.ReadLine()
+		if err != nil && count > 1 {
+			count++
+			fmt.Println("ERROR4", err)
+		}
+
 		if line != nil {
 			fmt.Println("ffmpeg log", stream.Id, string(line))
 		}

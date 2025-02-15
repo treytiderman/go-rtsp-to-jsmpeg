@@ -59,6 +59,35 @@
     <br>
     <br>
 
+    <!-- Streams -->
+    <details class="pad-4">
+        <summary>
+            Streams {{ len $.Streams }}
+            <hr>
+        </summary>
+        <div class="grid gap-4">
+            <br>
+
+            {{ range $Stream := $.Streams }}
+
+            <div class="grid gap-1">
+                <div class="flex gap-4">
+                    <div>{{ $Stream.Name }}</div>
+                    <div class="grow"></div>
+                    <div>ID: {{ $Stream.Id }}</div>
+                </div>
+                <pre>{{ $Stream.FFmpeg }}</pre>
+            </div>
+
+            {{ end }}
+
+            <br>
+
+        </div>
+
+    </details>
+
+
     <!-- Examples -->
     <details class="pad-4">
         <summary>
@@ -90,7 +119,7 @@
             <div class="grid gap-1">
                 <label>RTSP Stream (Amcrest)</label>
                 <pre>ffmpeg
-    -i rtsp://user:password@192.168.1.22:554/cam/realmonitor?channel=1&subtype=0
+    -i "rtsp://user:password@192.168.1.21:554/cam/realmonitor?channel=1&subtype=0"
     -f mpegts -codec:v mpeg1video
     -r 30
     -</pre>
