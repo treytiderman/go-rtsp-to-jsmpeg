@@ -1,9 +1,11 @@
-# Start: docker compose up -d --build
+# Start: sudo docker compose up -d --build
 # Logs: docker compose logs --follow --tail 1000
-# Stop: docker compose down
-
+# Stop: sudo docker compose down --remove-orphans
+# Update: sudo docker compose pull
+# Restart: sudo docker compose restart
+# UI: http://192.168.1.3:9000
 services:
-  go-ffmpeg-to-jsmpeg:
+  go-rtsp-to-jsmpeg:
     build:
       dockerfile: Dockerfile
       context: ./
