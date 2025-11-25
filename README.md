@@ -7,8 +7,14 @@ Take in a RTSP stream available on the network and restream it as a WebSocket st
 Server: RTSP stream (or other input) -> ffmpeg (encode mpeg1video) -> WebSocket stream
 
 Client: WebSocket stream -> jsmpeg (decode) -> Render to HTML Canvas Element
-
+ 
 See example [FFMPEG commands](./config/README.md)
+
+## web ui
+
+![web ui camera example screenshot](./screenshots/example-1x2.png)
+
+![web ui settings screenshot](./screenshots/settings.png)
 
 
 ## Docker
